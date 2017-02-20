@@ -9,7 +9,7 @@ includes:
     
     ```{r, echo = FALSE}
 library(knitr)
-knitr::opts_chunk$set(cache = FALSE, fig.width = 5, fig.height = 5,tidy = TRUE,highlight = TRUE,comment = "#>",strip.white = TRUE,collapse = TRUE)
+knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 8,tidy = TRUE,highlight = TRUE,comment = "#>",strip.white = TRUE,collapse = TRUE)
 options(width = 50)
 ```
 
