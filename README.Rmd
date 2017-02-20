@@ -1,0 +1,29 @@
+---
+  output: github_document
+---
+  
+  ```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+**Overview** 
+**GCalignR: An R package for aligning Gas-Chromatography data**
+Ottensmann, M., Stoffel, M.A., Hoffman, J.I. 
+
+**R_code.pdf** contains the code for all analyses. In addition, we provide our data in the folder called data, which should be placed in a subfolder of the working directory called data.
+
+**bbim.txt** contains the raw chemical dataset of the bumblebee *Bombus bimaculatus* formatted for \code{GCalingR}. The orignal data source can be reached here {\url{http://onlinelibrary.wiley.com/store/10.1002/jssc.201300388/asset/supinfo/jssc3437-sup-0001-TableS1.zip?v=1&s=57d5d58273d1d4207e70c72cecd5bba4b1fe95a1}{Dellicour S, Lecocq T. 2013, Table_S1 <doi:10.1002/jssc.201300388>}
+
+**bbim_ms.txt** contains an aligned subset of the raw chemical dataset of the bumblebee *Bombus bimaculatus* based on peaks that were identified by GC-MS. The orignal data source can be reached here {\url{http://onlinelibrary.wiley.com/store/10.1002/jssc.201300388/asset/supinfo/jssc3437-sup-0001-TableS1.zip?v=1&s=57d5d58273d1d4207e70c72cecd5bba4b1fe95a1}{Dellicour S, Lecocq T. 2013, Table_S2 <doi:10.1002/jssc.201300388>}
+
+**beph.txt** contains the raw chemical dataset of the bumblebee *Bombus ephippiatus* formatted for \code{GCalingR}. The orignal data source can be reached here {\url{http://onlinelibrary.wiley.com/store/10.1002/jssc.201300388/asset/supinfo/jssc3437-sup-0001-TableS1.zip?v=1&s=57d5d58273d1d4207e70c72cecd5bba4b1fe95a1}{Dellicour S, Lecocq T. 2013, Table_S1 <doi:10.1002/jssc.201300388>}
+
+**beph_ms.txt** contains an aligned subset of the raw chemical dataset of the bumblebee *Bombus ephippiatus* based on peaks that were identified by GC-MS. The orignal data source can be reached here {\url{http://onlinelibrary.wiley.com/store/10.1002/jssc.201300388/asset/supinfo/jssc3437-sup-0001-TableS1.zip?v=1&s=57d5d58273d1d4207e70c72cecd5bba4b1fe95a1}{Dellicour S, Lecocq T. 2013, Table_S3 <doi:10.1002/jssc.201300388>}
+
+**bfla.txt** contains the raw chemical dataset of the bumblebee *Bombus flavifrons* formatted for \code{GCalingR}. The orignal data source can be reached here {\url{http://onlinelibrary.wiley.com/store/10.1002/jssc.201300388/asset/supinfo/jssc3437-sup-0001-TableS1.zip?v=1&s=57d5d58273d1d4207e70c72cecd5bba4b1fe95a1}{Dellicour S, Lecocq T. 2013, Table_S1 <doi:10.1002/jssc.201300388>}
+
+**bfla_ms.txt** contains an aligned subset of the raw chemical dataset of the bumblebee *Bombus flavifrons* based on peaks that were identified by GC-MS. The orignal data source can be reached here {\url{http://onlinelibrary.wiley.com/store/10.1002/jssc.201300388/asset/supinfo/jssc3437-sup-0001-TableS1.zip?v=1&s=57d5d58273d1d4207e70c72cecd5bba4b1fe95a1}{Dellicour S, Lecocq T. 2013, Table_S2 <doi:10.1002/jssc.201300388>}
