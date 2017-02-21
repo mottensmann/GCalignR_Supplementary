@@ -13,7 +13,7 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 8,tidy = TRUE,h
 options(width = 50)
 ```
 
-This document provides all the `R code` used for our manuscript. Both the Rmarkdown file and the data can be accessed directly by downloading the accompanying GitHub repository. Just click on this [link](https://github.com/mottensmann/GCalignR_Supplementary) repository. and then download a zip archive containing all the files. Make sure you read the instructions the `README` file on GitHub. For computational reasons we provide the results of time consuming steps along as separate datasets. If you have any questions, do not hesitate to contact:
+This document provides all the `R code` used for our manuscript. Both the Rmarkdown file and the data can be accessed directly by downloading the accompanying GitHub repository. Just click on this [link](https://github.com/mottensmann/GCalignR_Supplementary) and then download a zip archive containing all the files. Make sure you read the instructions in the `README` file on GitHub. For computational reasons we provide the results of time consuming steps in addition to the raw data on GitHub. If you have any questions, do not hesitate to contact:
 meinolf.ottensmann@web.de 
 
 ## Prerequisites
