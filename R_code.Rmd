@@ -13,7 +13,7 @@ knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 8,tidy = TRUE,h
 options(width = 50)
 ```
 
-This document provides all the `R code` used for our manuscript. Both the Rmarkdown file and the data can be accessed directly by downloading this [GitHub](https://github.com/mottensmann/GCalignR_Supplementary) repository. Just click on the link and then download a zip archive containing all the files. Make sure you read the instructions the `README` file on GitHub. For computational reasons we provide the results of time consuming steps along as separate datasets. If you have any questions, do not hesitate to contact:
+This document provides all the `R code` used for our manuscript. Both the Rmarkdown file and the data can be accessed directly by downloading the accompanying GitHub repository. Just click on this [link](https://github.com/mottensmann/GCalignR_Supplementary) repository. and then download a zip archive containing all the files. Make sure you read the instructions the `README` file on GitHub. For computational reasons we provide the results of time consuming steps along as separate datasets. If you have any questions, do not hesitate to contact:
 meinolf.ottensmann@web.de 
 
 ## Prerequisites
@@ -22,21 +22,21 @@ Most functions that are used in this analysis are part of our package `GCalignR`
 * Install `devtools` , `ggplot2`, `plot3D` and `vegan` if these packages are not available.
 
 ```{r,eval=FALSE}
-## install devtools
+# install devtools
 if (!("devtools" %in% rownames(installed.packages()))) { 
     install.packages("devtools")
 } else if (packageVersion("devtools") < 1.6) {
     install.packages("devtools")
 }
-## install ggplot2
+# install ggplot2
 if (!"ggplot2" %in% rownames(install.packages())) {
     install.packages("ggplot2")
 }
-## install plot3D
+# install plot3D
 if (!"plot3D" %in% rownames(installed.packages())) {
     install.packages("plot3D")
 }
-## install vegan
+# install vegan
 if (!"vegan" %in% rownames(installed.packages())) {
     install.packages("vegan")
 }
@@ -45,7 +45,7 @@ if (!"vegan" %in% rownames(installed.packages())) {
 * Installing the most recent version of `GCalignR` from GitHub.
 
 ```{r,eval=FALSE}
-## install GCalignR
+# install GCalignR
 devtools::install_github("mastoffel/GCalignR")
 ```
 
@@ -56,11 +56,11 @@ library(GCalignR)
 library(ggplot2)
 library(plot3D)
 library(vegan)
-## small function to test parameters in align_chromatograms 
+# small function to test parameters in align_chromatograms 
 source("R/optimal_params.R")
-## calculates errors by matching aligned data to a table of known substances
+# calculates errors by matching aligned data to a table of known substances
 source("R/error_rate.R")
-## custom function for simulations based on chromatograms
+# custom function for simulations based on chromatograms
 source("R/ChromaSimFunctions.R")
 ```
 
@@ -77,6 +77,7 @@ check_input(fpath) # checks the data
 In order to begin the alignment procedure, the following code needs to be executed:
 
 ```{r, eval = FALSE}
+# align the chemical data
 aligned_peak_data <- align_chromatograms(data = peak_data,
         rt_col_name = "time",
         max_diff_peak2mean = 0.02,
@@ -131,7 +132,7 @@ scent_nmds <- cbind(scent_nmds,
 ```
 
 ```{r, eval=TRUE,fig.cap="NMDS plot showing the cluserting by colony", fig.align='center'}
-## creating figure 3
+# Figure 3
 ggplot(data = scent_nmds,aes(MDS1,MDS2,color = colony)) +
     geom_point() + 
     theme_void() + 
@@ -146,15 +147,15 @@ There are two parameters of major importance, namely `max_diff_peak2mean` and `m
 * Run alignments with all combinations of both parameters
 
 ```{r,eval=FALSE}
-## B. flavifrons
+# B. flavifrons
 results_bfla <- optimal_params(data = "data/bfla.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
 save(results_bfla,file = "data/results_bfla.RData")
 
-## B. bimaculatus
+# B. bimaculatus
 results_bbim <- optimal_params(data = "data/bbim.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
 save(results_bbim,file = "data/results_bbim.RData")
 
-## B. ephippiatus
+# B. ephippiatus
 results_beph <- optimal_params(data = "data/beph.txt", rt_col_name ="RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
 save(results_beph,file = "data/results_beph.RData")
 ```
@@ -164,7 +165,7 @@ save(results_beph,file = "data/results_beph.RData")
 Error rate calculations are executed with a custom function `error_rate` that uses a list of annotated substances as a reference. See the code for details. 
 
 ```{r,eval=TRUE, cache=TRUE}
-## Load data
+# Load data
 load("data/results_bbim.RData")
 load("data/results_beph.RData")
 load("data/results_bfla.RData")
@@ -185,6 +186,7 @@ errors_bfla[["error"]] <- unlist(lapply(X = results_bfla[[1]], error_rate,"data/
 * Plot results using package `plot3D`
 
 ```{r,eval=TRUE, fig.cap="Parameter combinations B. bimaculatus dataset", fig.align='center'}
+# Figure 4
 with(errors_bbim,scatter3D(
 x = p2p,
 y = p2m,
@@ -207,6 +209,7 @@ cex.main = 1.5,
 zlim = c(0,0.2)))
 ```
 ```{r, fig.cap="Parameter combinations B. ephippiatus dataset", fig.align='center'}
+# Figure 5
 with(errors_beph, scatter3D(
 x = p2p,
 y = p2m,
@@ -230,6 +233,7 @@ zlim = c(0,0.2)))
 ```
 
 ```{r, fig.cap="Parameter combinations B. flavifrons dataset", fig.align='center'}
+# Figure 6
 with(errors_bfla, scatter3D(
 x = p2p ,
 y = p2m,
@@ -257,24 +261,24 @@ zlim = c(0,0.2)))
 * The input data for this simulation is the raw chemical dataset that is available within `aligned_peak_data.RData`. This file is supplied with the package.
 
 ```{r, eval=FALSE}
-## list of samples
+# list of samples
 chromas <- aligned_peak_data[["input_list"]]
 
-## vector of additional noise levels between 0 and 1
+# vector of additional noise levels between 0 and 1
 p <- rep(seq(from = 0,to = 1,by = 0.1),each = 10)
 sim_data <- list()
 names <- character()
 
 for (i in 1:length(p)) { 
-## add errors to the samples using the function add_peak_error
+# add errors to the samples using the function add_peak_error
 temp <- lapply(chromas,add_peak_error,p = p[i],
                rt_col_name = "time",conc_col_name = "area",
                distr = c(-0.02,-0.01,0.01,0.02)) 
 
-## extract peak list with manipulated retention times
+# extract peak list with manipulated retention times
 temp <- lapply(temp, FUN = function(x) x[["chroma"]])
 
-## align the dataset
+# align the dataset
 aligned <- align_chromatograms(temp, rt_col_name = "time",max_linear_shift = 0.05,rt_cutoff_low = 8,delete_single_peak = T,blanks = c("C2","C3"))
 
 sim_data <- append(sim_data,list(aligned))
@@ -288,11 +292,11 @@ save(x = seal_simulations,file = paste0("data/","seal_simulations",".RData"))
 * Load the results of the simulation
 
 ```{r, eval=FALSE}
-## simulated data
+# simulated data
 load("data/seal_simulations.RData")
-## extract data
+# extract data
 aligned <- seal_simulations[["SimAlign"]]
-## covariates are availabe as a data frame that is distributed with GCalignR
+# covariates are availabe as a data frame that is distributed with GCalignR
 data("peak_factors")
 covars <- peak_factors
 ```
@@ -353,7 +357,7 @@ p2 <- ggplot(df, aes(noise, r2)) +
           axis.title.y = element_text(margin = margin(0,13,0,0)),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
-
+# Figure 7
 grid::grid.draw(rbind(ggplotGrob(p1), ggplotGrob(p2), size = "first"))
 ```
 
@@ -365,7 +369,7 @@ To further assess the performance of GCalignR, we calculated alignment error rat
 \mathrm{rt_m} > \left(\frac{\mathrm{\sum_{i=1}^{m-1}rt_{i}}}{\mathrm{m}-1}\right) + \mathrm{max\_diff\_peak2mean}
 \end{eqnarray}
 
-By systematically changing the two parameters `max_diff_peak2mean` and `min_diff_peak2peak`, we explored 100 parameter combinations to explore how parameter values affect the alignment accuracy.  
+By systematically changing the two parameters `max_diff_peak2mean` and `min_diff_peak2peak`, we explored 100 parameter combinations to investigate how parameter values affect the alignment accuracy.  
 
 * We align that untreated dataset in order to extract input retention times
 
@@ -391,8 +395,8 @@ beph_chroma <- lapply(beph_zero[["input_list"]],na.remove) # remove NAs
 ````
 
 ```{r, eval=FALSE}
-## Bombums flavifrons
-## ------------------
+# Bombums flavifrons
+# ------------------
 bfla_out <- sim_linear_shift(bfla_chroma,
                              rt_col_name = "RT",shifts = c(-0.03,0.03))
 bfla_shifted <- bfla_out[["Chromas"]] 
@@ -401,14 +405,14 @@ p <- rep(seq(from = 0,to = 1,by = 0.1),each = 10)
 bfla_data <- list()
 names <- character()
 for (i in 1:length(p)) { 
-  ## add errors
+  # add errors
   temp <- lapply(bfla_shifted,add_peak_error,p = p[i],
                  rt_col_name = "RT",conc_col_name = "Area",
                  distr = c(-0.02,-0.01,0.01,0.02)) 
-  ## extract peak list
+  # extract peak list
   temp <- lapply(temp, FUN = function(x) x[["chroma"]])
   aligned <- align_chromatograms(temp,rt_col_name = "RT",max_linear_shift = 0.05)     
-  ## We need the "true" retention times for referencing purposes
+  # We need the "true" retention times for referencing purposes
   aligned <- original_rt(org = bfla_chroma,aligned = aligned,rt_col_name = "RT")
   bfla_data <- append(bfla_data,list(aligned))
   names <- c(names,paste0("no_",as.character(i),"_noise_",as.character(p[i])))
@@ -416,10 +420,10 @@ for (i in 1:length(p)) {
 names(bfla_data) <- names
 bfla_simulations <- list(OptAlign = bfla_zero,SimAlign = bfla_data,noise = p) 
 save(x = bfla_simulations,file = paste0("data/","bfla_simulations",".RData"))   
-## ------------------
+# ------------------
 
-## Bombus bimaculatus
-## ------------------
+# Bombus bimaculatus
+# ------------------
 bbim_out <- sim_linear_shift(bbim_chroma,
                              rt_col_name = "RT",shifts = c(-0.03,0.03))
 bbim_shifted <- bbim_out[["Chromas"]] # linearly shifted sample
@@ -428,15 +432,15 @@ p <- rep(seq(from = 0,to = 1,by = 0.1),each = 10)
 bbim_data <- list()
 names <- character()
 for (i in 1:length(p)) { 
-  ## add errors
+  # add errors
   temp <- lapply(bbim_shifted,add_peak_error,p = p[i],
                  rt_col_name = "RT",conc_col_name = "Area",
                  distr = c(-0.02,-0.01,0.01,0.02)) 
-  ## extract peak list
+  # extract peak list
   temp <- lapply(temp, FUN = function(x) x[["chroma"]])
   aligned <- align_chromatograms(temp,
                                  rt_col_name = "RT",max_linear_shift = 0.05)
-  ## We need the "true" retention times for referencing purposes
+  # We need the "true" retention times for referencing purposes
   aligned <- original_rt(org = bbim_chroma,aligned = aligned,rt_col_name = "RT")
   bbim_data <- append(bbim_data,list(aligned))
   names <- c(names,paste0("no_",as.character(i),"_noise_",as.character(p[i])))
@@ -444,10 +448,10 @@ for (i in 1:length(p)) {
 names(bbim_data) <- names
 bbim_simulations <- list(OptAlign = bbim_zero,SimAlign = bbim_data,noise = p) 
 save(x = bbim_simulations,file = paste0("data/","bbim_simulations",".RData"))   
-## ------------------
+# ------------------
 
-## Bombus ephippiatus
-## ------------------
+# Bombus ephippiatus
+# ------------------
 
 beph_out <- sim_linear_shift(beph_chroma, rt_col_name = "RT",shifts = c(-0.03,0.03))
 beph_shifted <- beph_out[["Chromas"]] # linearly shifted sample
@@ -456,16 +460,13 @@ p <- rep(seq(from = 0,to = 1,by = 0.1),each = 10)
 beph_data <- list()
 names <- character()
 for (i in 1:length(p)) { 
-  sink("S1_Status_Summary.txt",append = TRUE) # Prepare a Text file
-  cat(paste("\n","BEPH",Sys.time(), "Iteratation", as.character(i), "of", as.character(length(p))))
-  sink()
-  ## add errors
+  # add errors
   temp <- lapply(beph_shifted,add_peak_error,p = p[i],
                  rt_col_name = "RT",conc_col_name = "Area",distr = c(-0.02,-0.01,0.01,0.02)) 
-  ## extract peak list
+  # extract peak list
   temp <- lapply(temp, FUN = function(x) x[["chroma"]])
   aligned <- align_chromatograms(temp,rt_col_name = "RT", max_linear_shift = 0.05)    
-  ## We need the "true" retention times for referencing purposes
+  # We need the "true" retention times for referencing purposes
   aligned <- original_rt(org = beph_chroma,aligned = aligned,rt_col_name = "RT")
   beph_data <- append(beph_data,list(aligned))
   names <- c(names,paste0("no_",as.character(i),"_noise_",as.character(p[i])))
@@ -473,7 +474,7 @@ for (i in 1:length(p)) {
 names(beph_data) <- names
 beph_simulations <- list(OptAlign = beph_zero,SimAlign = beph_data,noise = p) 
 save(x = beph_simulations,file = paste0("data/","beph_simulations",".RData"))  
-## ------------------
+# ------------------
 ```
 
 * Calculate error rates
@@ -482,11 +483,11 @@ save(x = beph_simulations,file = paste0("data/","beph_simulations",".RData"))
 load("data/bfla_simulations.RData")
 load("data/beph_simulations.RData")
 load("data/bbim_simulations.RData")
-## set up data frames
+# set up data frames
 bfla <- data.frame(data.frame(noise = bfla_simulations[["noise"]]))
 bbim <- data.frame(data.frame(noise = bbim_simulations[["noise"]]))
 beph <- data.frame(data.frame(noise = beph_simulations[["noise"]]))
-## calculate errors
+# calculate errors
 bfla[["error"]] <- unlist(lapply(X = bfla_simulations[["SimAlign"]],
                                  error_rate, Reference = "data/bfla_ms.txt",
                                  rt_col_name = "RT", linshift = FALSE))
@@ -496,7 +497,7 @@ bbim[["error"]] <- unlist(lapply(X = bbim_simulations[["SimAlign"]],
 beph[["error"]] <- unlist(lapply(X = beph_simulations[["SimAlign"]],
                                  error_rate, Reference = "data/beph_ms.txt",
                                  rt_col_name = "RT",linshift = FALSE))
-## Combine data into one data frame
+# Combine data into one data frame
 df <- rbind(bbim,bfla,beph)
 df[["id"]] <- rep(c("bbim","bfla","beph"),each = nrow(df)/3)
 save(df,file = "data/df_bumblebee.RData")
@@ -511,6 +512,7 @@ library(ggplot2)
 load("data/df_bumblebee.RData")
 df[["id"]] <- plyr::revalue(df[["id"]], c("bbim"="Bombus bimaculatus", "beph"="B. ephippiatus", "bfla" = "B. flavifrons"))
 df[["id"]] <- factor(df[["id"]], levels = c("Bombus bimaculatus","B. ephippiatus", "B. flavifrons"))
+# Figure 8
 ggplot(df, aes(x = noise, y = error,group = id, col = id, fill = id)) + 
   facet_wrap(~id) +
   geom_smooth(size = 1.5, se = T, aes(group = id)) + 
