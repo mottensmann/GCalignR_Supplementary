@@ -1,21 +1,28 @@
 ## Ordiplot
 library(ggplot2)
+## run to code chunk in R_code
 a <- ggplot(data = scent_nmds,aes(MDS1,MDS2,color = colony)) +
     geom_point() + 
     theme_void() + 
     scale_color_manual(values = c("blue","red")) +
     theme(panel.background = element_rect(colour = "black", size = 1.25,
             fill = NA), aspect.ratio = 1, legend.position = "none") 
-a
-ggplot2::ggsave(a,filename = "ottensmann-stoffel-hoffman/figures/ordiplot.png",width = 5,height = 5,units = "in",dpi = 300)
+ggplot2::ggsave(a, filename = "Figures/Fig7.tiff",width = 5,height = 5,units = "in",dpi = 300, device = "tiff")
 
 ## Heatmap
 library(ggplot2)
 library(GCalignR)
-a <- gc_heatmap(aligned_peak_data,type = "binary",threshold = 0.05,main_title = "")
-a <- a + theme(plot.background = element_rect(fill = "white"))
+## run to code chunk
+a <- gc_heatmap(aligned_peak_data,type = "binary",
+                threshold = 0.05,
+                main_title = "",
+                label = "none",
+                show_legend = F)
+a <- a + theme(plot.background = element_rect(fill = "white"),
+               axis.title.x = element_text(size = 12),
+               axis.title.y = element_text(size = 12))
 
-ggplot2::ggsave(a,filename = "ottensmann-stoffel-hoffman/figures/heatmap.tiff",width = 6,height = 5,units = "in",dpi = 300)
+ggplot2::ggsave(a,filename = "Figures/Figure6.tiff",width = 6,height = 4,units = "in",dpi = 300, device = "tiff")
 
 ## diagnostic plots
 library(GCalignR)
