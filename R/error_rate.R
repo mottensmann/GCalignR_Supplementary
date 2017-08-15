@@ -1,5 +1,6 @@
-error_rate <- function(GCalignObject, Reference = NULL, rt_col_name = "RT", linshift = TRUE) {
+error_rate <- function(GCalignObject, Reference = NULL, rt_col_name = "RT", linshift = FALSE) {
 
+  # linshift for compatibility with outdated version of GCalignR
 ### Internal functions
 ### -----------------------------------------------------------------
     # Mode of a vector
@@ -17,18 +18,18 @@ error_rate <- function(GCalignObject, Reference = NULL, rt_col_name = "RT", lins
     
     # Get retention times
 rt <- GCalignObject[["aligned"]][[rt_col_name]]
-    # load ms-data and round retention times
+    # load ms-data 
 ref <- read.table(Reference,sep = "\t",header = T)
-ref[,2:ncol(ref)] <- round(ref[,2:ncol(ref)],digits = 2)
+# ref[,2:ncol(ref)] <- round(ref[,2:ncol(ref)],digits = 2)
     # format as lists
-aligned <- as.list(round(rt[,2:ncol(rt)],2))
+aligned <- as.list(round(rt[,2:ncol(rt)],digits = 4)) 
 if (isTRUE(linshift)) {
     # Obtain linear shifts that have been applied to retention times during alignment
     shifts <- GCalignObject[["Logfile"]][["LinearShift"]][["shift"]] 
 for (i in 1:length(aligned)) {
     aligned[[i]][aligned[[i]] > 0] <- aligned[[i]][aligned[[i]] > 0] - shifts[i]
 }
-    aligned <- lapply(aligned,round,digits = 2)
+    aligned <- lapply(aligned,round,digits = 4)
 } 
 ms <- as.list(ref[,3:ncol(ref)])
 

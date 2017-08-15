@@ -1,4 +1,10 @@
 base
+methods
+datasets
+utils
+grDevices
+graphics
+stats
 knitr
 GCalignR
 ggplot2
@@ -6,3 +12,4 @@ plot3D
 permute
 lattice
 vegan
+ptw

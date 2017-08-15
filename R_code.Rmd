@@ -1,6 +1,6 @@
 ---
 title: "R-code for 'GCalignR: An R package for aligning Gas-Chromatography data'"
-author: "Meinolf Ottensmann, Martin A. Stoffel, Joseph I. Hoffman"
+author: "Meinolf Ottensmann, Martin A. Stoffel, Hazel Nichols, Joseph I. Hoffman"
 output:
     pdf_document: default
 includes:
@@ -36,17 +36,21 @@ if (!"ggplot2" %in% rownames(install.packages())) {
 if (!"plot3D" %in% rownames(installed.packages())) {
     install.packages("plot3D")
 }
+# install ptw
+if (!"ptw" %in% rownames(installed.packages())) {
+    install.packages("ptw")
+}
 # install vegan
 if (!"vegan" %in% rownames(installed.packages())) {
     install.packages("vegan")
 }
 ```
 
-* Installing the most recent version of `GCalignR` from GitHub.
+* Installing `GCalignR`.
 
 ```{r,eval=FALSE}
 # install GCalignR
-devtools::install_github("mastoffel/GCalignR")
+install.packages("GCalignR")
 ```
 
 * Load packages and source custom functions.
@@ -56,12 +60,19 @@ library(GCalignR)
 library(ggplot2)
 library(plot3D)
 library(vegan)
+library(ptw)
 # small function to test parameters in align_chromatograms 
 source("R/optimal_params.R")
 # calculates errors by matching aligned data to a table of known substances
 source("R/error_rate.R")
 # custom function for simulations based on chromatograms
 source("R/ChromaSimFunctions.R")
+## functions for plotting 
+source("R/NMDS-Functions.R")
+## convert data to be used with ptw
+source("R/Convert2ptw.R")
+## calculation of descriptive stats for a data frame
+source("R/summary_stats.R")
 ```
 
 ## Workflow of `GCalignR`
@@ -102,11 +113,11 @@ plot(aligned_peak_data) # Figure 1
 Additionally, the full alignment can be visualised inspected using a heat map with the function gc_heatmap.
 
 ```{r, fig.height = 8, fig.width = 8,fig.align='center',fig.cap="Heatmaps allow to inspect the distribution of substances across samples as well as the variability of their retention times.",eval=TRUE}
-gc_heatmap(aligned_peak_data,type = "binary",threshold = 0.05) # Figure 2
+gc_heatmap(aligned_peak_data,type = "binary", threshold = 0.05) # Figure 2
 ```
 
 ### Peak normalisation
-In order to account for differences in the total concentration of samples, we provide an additional function normalise_peaks that can be used to normalise peak abundances.
+In order to account for differences in the total concentration of samples, we provide an additional function `norm_peaks` that can be used to normalise peak abundances.
 
 ```{r}
 scent <- norm_peaks(data = aligned_peak_data,
@@ -124,7 +135,7 @@ scent <- scent[match(row.names(peak_factors),
 scent <- log(scent + 1) # log + 1 transformation
 ```
 
-```{r, results='hide', cache=TRUE}
+```{r, results='hide'}
 scent_nmds <- vegan::metaMDS(comm = scent,distance = "bray") # NMDS
 scent_nmds <- as.data.frame(scent_nmds[["points"]]) # extract points
 scent_nmds <- cbind(scent_nmds,
@@ -140,13 +151,70 @@ ggplot(data = scent_nmds,aes(MDS1,MDS2,color = colony)) +
     theme(panel.background = element_rect(colour = "black", size = 1.25,
             fill = NA), aspect.ratio = 1, legend.position = "none")
 ```
+## Evaluation of the algorithm performance
+### Aligning the earwig dataset
+The earwig dataset (Wong et al. 2014) can be dowloaded on [Dryad](https://datadryad.org/resource/doi:10.5061/dryad.73180) and is available as a text file on this GitHub repository. 
 
-## Explore the parameter space in `align_chromatograms`
+```{r, eval=FALSE}
+earwig_1 <- align_chromatograms(data = "data/earwig.txt", rt_col_name = "RT",
+                         max_linear_shift = 0.05,
+                         max_diff_peak2mean = 0.05, 
+                         min_diff_peak2peak = 0.2) 
+save(earwig_1, file = "data/earwig_1.RData")
+```
+
+```{r}
+## load aligning results
+load("data/earwig_1.RData")
+## inspect the distribution of peaks for the complete dataset
+# gc_heatmap(earwig_1)
+## inspect a representative subset
+a <- gc_heatmap(earwig_1,
+                label = "xy",
+                label_size = 12,
+                main_title = "A",
+                show_legend = F,
+                samples_subset = c(1:16,21,167,174,285),
+                threshold = 0.2)
+a <- a + theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+               plot.title = element_text(hjust = 0), plot.background = element_rect(fill = "white"))
+print(a)
+```
+
+The patterns shown by the heatmaps suggest to optimise the alignment by allowing to merge rows with larger deviation in retention times
+
+```{r, eval = FALSE}
+earwig_2 <- align_chromatograms(data = "data/earwig.txt", rt_col_name = "RT",
+                          max_linear_shift = 0.05,
+                          max_diff_peak2mean = 0.05, 
+                          min_diff_peak2peak = 0.75) 
+save(earwig_2, file = "data/earwig_2.RData")
+```
+
+```{r}
+## load aligning results
+load("data/earwig_2.RData")
+## inspect the distribution of peaks for the complete dataset
+# gc_heatmap(earwig_2)
+## inspect a representative subset
+b <- gc_heatmap(earwig_2,
+                label = "xy",
+                label_size = 12,
+                main_title = "A",
+                show_legend = F,
+                samples_subset = c(1:16,21,167,174,285),
+                threshold = 0.2)
+b <- b + theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+               plot.title = element_text(hjust = 0), plot.background = element_rect(fill = "white"))
+print(b)
+```
+
+### Explore the parameter space in `align_chromatograms`
 There are two parameters of major importance, namely `max_diff_peak2mean` and `min_diff_peak2peak`. While the first determines the finescale grouping of retention times the latter greatly influences the formation of substances by combining initially separated rows of similar retention times. Here, we evaluate the error rate as a function of the combination of these two parameters. The combinations are tested by iteratively running `aling_chromatograms` 100 parameter combinations.
 
 * Run alignments with all combinations of both parameters
 
-```{r,eval=FALSE}
+```{r,eval=FALSE} 
 # B. flavifrons
 results_bfla <- optimal_params(data = "data/bfla.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
 save(results_bfla,file = "data/results_bfla.RData")
@@ -256,111 +324,6 @@ cex.main = 1.5,
 zlim = c(0,0.2))) 
 ```
 
-## Influence of additional random noise on the detection of patterns in the fur seal dataset
-
-* The input data for this simulation is the raw chemical dataset that is available within `aligned_peak_data.RData`. This file is supplied with the package.
-
-```{r, eval=FALSE}
-# list of samples
-chromas <- aligned_peak_data[["input_list"]]
-
-# vector of additional noise levels between 0 and 1
-p <- rep(seq(from = 0,to = 1,by = 0.1),each = 10)
-sim_data <- list()
-names <- character()
-
-for (i in 1:length(p)) { 
-# add errors to the samples using the function add_peak_error
-temp <- lapply(chromas,add_peak_error,p = p[i],
-               rt_col_name = "time",conc_col_name = "area",
-               distr = c(-0.02,-0.01,0.01,0.02)) 
-
-# extract peak list with manipulated retention times
-temp <- lapply(temp, FUN = function(x) x[["chroma"]])
-
-# align the dataset
-aligned <- align_chromatograms(temp, rt_col_name = "time",max_linear_shift = 0.05,rt_cutoff_low = 8,delete_single_peak = T,blanks = c("C2","C3"))
-
-sim_data <- append(sim_data,list(aligned))
-names <- c(names,paste0("no_",as.character(i),"_noise_",as.character(p[i])))
-}
-names(sim_data) <- names
-seal_simulations <- list(SimAlign = sim_data,noise = p) 
-save(x = seal_simulations,file = paste0("data/","seal_simulations",".RData"))
-```
-
-* Load the results of the simulation
-
-```{r, eval=FALSE}
-# simulated data
-load("data/seal_simulations.RData")
-# extract data
-aligned <- seal_simulations[["SimAlign"]]
-# covariates are availabe as a data frame that is distributed with GCalignR
-data("peak_factors")
-covars <- peak_factors
-```
-
-* Perform the NMDS
-
-```{r, results="hide",eval=FALSE}
-# get the scent, normalised and log+1 transformed
-scent <- lapply(aligned, scent_extract,covars = covars) 
-save(x = scent,file = "data/scent.RData")
-# NDMS
-scent_mds <- lapply(scent, myMetaMDS, covars) 
-save(x = scent_mds,file = "data/scent_mds.RData")
-```
-
-* Calculate R2 values using `adonis` from package `vegan` 
-
-```{r,eval=FALSE}
-scent_adonis_colony <- lapply(scent, adonis_colony,covars) # calculates the adonis stats
-save(x = scent_adonis_colony, file = "data/scent_adonis_colony.RData")
-```
-
-```{r, eval=FALSE}
-load(file = "data/scent_adonis_colony.RData") 
-load(file = "data/seal_simulations.RData")
-noise <- factor(seal_simulations[["noise"]])
-r2 <- unlist(lapply(scent_adonis_colony, function(x) x[["aov.tab"]][["R2"]][1]))
-p.val <- unlist(lapply(scent_adonis_colony, function(x) x[["aov.tab"]][["Pr(>F)"]][1]))
-peaks <- unlist(lapply(seal_simulations[["SimAlign"]],function(x) x[["Logfile"]][["Aligned"]][["retained"]]))
-df <- data.frame(noise, r2, p.val, peaks)
-save(df, file = "data/df_seal_simulations.RData")
-```
-
-* Plot the results
-```{r,results="hide",fig.align='center', message=FALSE, fig.cap="Effects of additional noise on alignments of the fur seal data"}
-load("data/df_seal_simulations.RData")
-p1 <- ggplot(df, aes(noise, peaks)) + 
-    geom_smooth(size = 1.5,se = T,colour = "blue",aes(group = 1)) +
-    geom_boxplot(fill = "blue",alpha = .3,size = 0.1,weight = 1) +
-    labs(y = "Number of substances")  +
-    scale_y_continuous(breaks = seq(200,280,10)) +
-    theme_bw(base_family = "sans",base_size = 14) +
-    theme(aspect.ratio = 0.5,
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.title.x = element_blank(),
-          axis.title.y = element_text(margin = margin(0,13,0,0)),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
-
-p2 <- ggplot(df, aes(noise, r2)) + 
-    geom_smooth(size = 1.5,se = T,colour = "red",aes(group = 1)) + 
-    geom_boxplot(fill = "red",alpha = .3,size = 0.1,weight = 1) +
-    labs(y = "Adonis R²",x = "Additional noise level")  +
-    theme_bw(base_family = "sans",base_size = 14) +
-    scale_y_continuous(breaks = seq(0,0.2,0.025)) +
-    theme(aspect.ratio = 0.5,
-          axis.title.y = element_text(margin = margin(0,13,0,0)),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
-# Figure 7
-grid::grid.draw(rbind(ggplotGrob(p1), ggplotGrob(p2), size = "first"))
-```
-
 ## Validation based on error rates of known substances from three bumblebee datasets
 To further assess the performance of GCalignR, we calculated alignment error rates based on three previously published bumblebee dataset comprising known substances identified using GC-MS (Dellicour & Lecocq 2013).  The first dataset comprises 24 *Bombus bimaculatus* individuals characterised for 32 substances (total = 717 retention times). The second comprises 20 *B. ephippiatus*  individuals characterised for 42 substances (total = 782 retention times) and the third comprises 11 *B. flavifrons* individuals characterised for 44 substances (total = 457 retention times). We calculated the error rate as the ratio between incorrectly assigned retention times and the total number of retention times (equation \eqref{Eq:one}).
 
@@ -392,7 +355,7 @@ load("data/bfla_zero.RData")
 bfla_chroma <- lapply(bfla_zero[["input_list"]],na.remove) # remove NAs
 bbim_chroma <- lapply(bbim_zero[["input_list"]],na.remove) # remove NAs
 beph_chroma <- lapply(beph_zero[["input_list"]],na.remove) # remove NAs
-````
+``` 
 
 ```{r, eval=FALSE}
 # Bombums flavifrons
@@ -507,10 +470,8 @@ save(df,file = "data/df_bumblebee.RData")
 
 ```{r, fig.align='center', fig.cap="Effects of additional noise on error rates"}
 load("data/df_bumblebee.RData")
-rm(list = ls())
-library(ggplot2)
 load("data/df_bumblebee.RData")
-df[["id"]] <- plyr::revalue(df[["id"]], c("bbim"="Bombus bimaculatus", "beph"="B. ephippiatus", "bfla" = "B. flavifrons"))
+df[["id"]] <- plyr::revalue(df[["id"]], c("bbim" = "Bombus bimaculatus", "beph" = "B. ephippiatus", "bfla" = "B. flavifrons"))
 df[["id"]] <- factor(df[["id"]], levels = c("Bombus bimaculatus","B. ephippiatus", "B. flavifrons"))
 # Figure 8
 ggplot(df, aes(x = noise, y = error,group = id, col = id, fill = id)) + 
@@ -535,6 +496,85 @@ ggplot(df, aes(x = noise, y = error,group = id, col = id, fill = id)) +
                         size = 12)))
 ```
 
+## Testing parametric time warping for the alignment of the earwig dataset
+
+* load the data
+
+```{r}
+## format the data
+dat <- convert2ptw(data = "data/earwig.txt", rt_col_name = "RT", conc_col_name = "Response")
+## dat is a list of samples
+class(dat)
+## each list contains a matrix
+str(dat$Ad_001)
+## specify a reference sample
+ref <- "Ad_001"
+## get the index of ref in dat
+index <- which(names(dat) == ref)
+## extract a reference
+refst <- dat[index]
+## remove the reference from the list of samples
+sampst <- dat[-index]
+```
+
+* optimise the parameter trwdth
+Prior to aligning the dataset we optimise the WCC criterion, expressed by the parameter `trwdth`. See `?stptw` for details. Based on the knowledge that all peaks are shared between reference and sample. We can pick the value of `trwdth` that yields to best alignment performance. 
+
+```{r}
+## preallocate a data frame to store results
+opt.crit <- data.frame(wcc = 0, sum_dev = 0)
+## set up a vector of values to test 
+wcc <- c(seq(0.1,0.9,0.1),1:100) 
+## loop over all values
+for (i in 1:length(wcc)) {
+  ## conduct the warping 
+  ptw_out <- stptw(refst, sampst[1], trwdth = wcc[i])
+  ## extract results
+  opt.crit[i,] <- c(wcc[i], sum(abs(ptw_out$warped.sample[[1]][,1] - ptw_out$reference[[1]][,1])))
+}
+## the first row contains the value of wcc yielding to the best result
+head(opt.crit[order(opt.crit$sum_dev, decreasing = F),])
+```
+
+* Align all samples 
+
+```{r}
+ptw_out <- lapply(sampst, function(x) stptw(refst, list(x), trwdth = 2))
+
+## Estimate deviations between all homologous peaks with respect to the reference
+aligned <- do.call("rbind", lapply(ptw_out, function(fx) {
+  temp <- abs(as.vector(fx$warped.sample[[1]][,1]) - as.vector(fx$reference[[1]][,1]))
+}))
+
+## Obtain deviation from the raw for comparison
+input <- do.call("rbind", lapply(ptw_out, function(fx) {
+  temp <- abs(as.vector(fx$sample[[1]][,1]) - as.vector(fx$reference[[1]][,1]))
+}))
+
+## convert to data frames
+df1 <- as.data.frame(aligned); names(df1) <- paste0("P", 1:20); df1 <- suppressMessages(reshape2::melt(df1))
+df2 <- as.data.frame(input); names(df2) <- paste0("P", 1:20); df2 <- suppressMessages(reshape2::melt(df2))
+df1$data <- "ptw"; df2$data <- "raw"
+
+## merge data frames
+df <- rbind(df1,df2); names(df) <- c("Peak","diff","data")
+## calculate mean and standard deviations
+df <- summary_stats(data = df, measurevar = "diff", groupvars = c("Peak","data"), na.rm = T)
+
+## plot the results
+plot <- ggplot(df, aes(x = Peak, y = diff, fill = data)) +
+  geom_bar(stat = "identity", color = "black",
+           position = position_dodge()) +
+  geom_errorbar(aes(ymin = diff, ymax = diff + sd), width = .2,
+                position = position_dodge(.9)) +
+  labs(y = "Deviation from reference\nretention time [minutes]",
+       x = "Peak") +
+  theme_classic(base_size = 12) +
+  scale_fill_manual(values = c('darkblue','red')) +
+  scale_y_continuous(breaks = seq(0,0.35,0.05))
+print(plot)
+```
+
 ## References
 Dellicour S, Lecocq T. GCALIGNER 1.0: an alignment program to compute a
 multiple sample comparison data matrix from large eco-chemical dataset
@@ -547,3 +587,8 @@ https://CRAN.R-project.org/package=vegan.
 
 Wickham H. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New
 York; 2009. Available from: http://ggplot2.org.
+
+Wong JWY, Meunier J, Lucas C, Kölliker M. Paternal signature in kin
+recognition cues of a social insect: concealed in juveniles, revealed in adults.
+Proceedings of the Royal Society of London B: Biological Sciences.
+2014;281(1793):20141236.
