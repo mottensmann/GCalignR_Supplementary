@@ -5,7 +5,7 @@ Overview
 `GCalignR`: An R package for aligning Gas-Chromatography data
 -------------------------------------------------------------
 
-#### Meinolf Ottensmann, Martin A. Stoffel, Hazel Nichols and Joseph I. Hoffman
+#### Meinolf Ottensmann, Martin A. Stoffel, Hazel J. Nichols and Joseph I. Hoffman
 
 -   **R\_code.pdf** contains the code for all analyses. In addition, we provide our data in the folder called data, which should be placed in a subfolder of the working directory called data.
 

@@ -1,6 +1,6 @@
 ---
 title: "R-code for 'GCalignR: An R package for aligning Gas-Chromatography data'"
-author: "Meinolf Ottensmann, Martin A. Stoffel, Hazel Nichols, Joseph I. Hoffman"
+author: "Meinolf Ottensmann, Martin A. Stoffel, Hazel J. Nichols, Joseph I. Hoffman"
 output:
     pdf_document: default
 includes:
@@ -216,15 +216,15 @@ There are two parameters of major importance, namely `max_diff_peak2mean` and `m
 
 ```{r,eval=FALSE} 
 # B. flavifrons
-results_bfla <- optimal_params(data = "data/bfla.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
+results_bfla <- optimal_params(data = "data/bfla.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.1,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.4, by = 0.01))
 save(results_bfla,file = "data/results_bfla.RData")
 
 # B. bimaculatus
-results_bbim <- optimal_params(data = "data/bbim.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
+results_bbim <- optimal_params(data = "data/bbim.txt", rt_col_name = "RT", max_diff_peak2mean = seq(from = 0.01, to = 0.1,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.4, by = 0.01))
 save(results_bbim,file = "data/results_bbim.RData")
 
 # B. ephippiatus
-results_beph <- optimal_params(data = "data/beph.txt", rt_col_name ="RT", max_diff_peak2mean = seq(from = 0.01, to = 0.05,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.2, by = 0.01))
+results_beph <- optimal_params(data = "data/beph.txt", rt_col_name ="RT", max_diff_peak2mean = seq(from = 0.01, to = 0.1,by = 0.01), min_diff_peak2peak = seq(from = 0.01, to = 0.4, by = 0.01))
 save(results_beph,file = "data/results_beph.RData")
 ```
 
@@ -232,7 +232,7 @@ save(results_beph,file = "data/results_beph.RData")
 
 Error rate calculations are executed with a custom function `error_rate` that uses a list of annotated substances as a reference. See the code for details. 
 
-```{r,eval=TRUE, cache=TRUE}
+```{r,eval=FALSE}
 # Load data
 load("data/results_bbim.RData")
 load("data/results_beph.RData")
@@ -249,7 +249,18 @@ errors_beph[["error"]] <- unlist(lapply(X = results_beph[[1]], error_rate,"data/
 errors_bfla <- data.frame(p2p = results_bfla[[2]][["p2p"]], p2m = results_bfla[[2]][["p2m"]])
 
 errors_bfla[["error"]] <- unlist(lapply(X = results_bfla[[1]], error_rate,"data/bfla_ms.txt"))
+
+save(errors_bbim, file = "data/errors_bbim.RData")
+save(errors_beph, file = "data/errors_beph.RData")
+save(errors_bfla, file = "data/errors_bfla.RData")
 ```
+
+```{r, echo=FALSE}
+load("data/errors_bbim.RData")
+load("data/errors_beph.RData")
+load("data/errors_bfla.RData")
+```
+
 
 * Plot results using package `plot3D`
 
@@ -374,7 +385,8 @@ for (i in 1:length(p)) {
                  distr = c(-0.02,-0.01,0.01,0.02)) 
   # extract peak list
   temp <- lapply(temp, FUN = function(x) x[["chroma"]])
-  aligned <- align_chromatograms(temp,rt_col_name = "RT",max_linear_shift = 0.05)     
+  aligned <- align_chromatograms(temp,rt_col_name = "RT",max_linear_shift = 0.05,
+                                  min_diff_peak2peak = 0.3)     
   # We need the "true" retention times for referencing purposes
   aligned <- original_rt(org = bfla_chroma,aligned = aligned,rt_col_name = "RT")
   bfla_data <- append(bfla_data,list(aligned))
@@ -402,7 +414,8 @@ for (i in 1:length(p)) {
   # extract peak list
   temp <- lapply(temp, FUN = function(x) x[["chroma"]])
   aligned <- align_chromatograms(temp,
-                                 rt_col_name = "RT",max_linear_shift = 0.05)
+                                 rt_col_name = "RT",max_linear_shift = 0.05,
+                                 min_diff_peak2peak = 0.3)
   # We need the "true" retention times for referencing purposes
   aligned <- original_rt(org = bbim_chroma,aligned = aligned,rt_col_name = "RT")
   bbim_data <- append(bbim_data,list(aligned))
@@ -428,7 +441,8 @@ for (i in 1:length(p)) {
                  rt_col_name = "RT",conc_col_name = "Area",distr = c(-0.02,-0.01,0.01,0.02)) 
   # extract peak list
   temp <- lapply(temp, FUN = function(x) x[["chroma"]])
-  aligned <- align_chromatograms(temp,rt_col_name = "RT", max_linear_shift = 0.05)    
+  aligned <- align_chromatograms(temp,rt_col_name = "RT", max_linear_shift = 0.05,
+                                 min_diff_peak2peak = 0.3)    
   # We need the "true" retention times for referencing purposes
   aligned <- original_rt(org = beph_chroma,aligned = aligned,rt_col_name = "RT")
   beph_data <- append(beph_data,list(aligned))
@@ -461,20 +475,19 @@ beph[["error"]] <- unlist(lapply(X = beph_simulations[["SimAlign"]],
                                  error_rate, Reference = "data/beph_ms.txt",
                                  rt_col_name = "RT",linshift = FALSE))
 # Combine data into one data frame
-df <- rbind(bbim,bfla,beph)
-df[["id"]] <- rep(c("bbim","bfla","beph"),each = nrow(df)/3)
-save(df,file = "data/df_bumblebee.RData")
+df_bumblebee <- rbind(bbim,bfla,beph)
+df_bumblebee[["id"]] <- rep(c("bbim","bfla","beph"),each = nrow(df)/3)
+save(df_bumblebee, file = "data/df_bumblebee.RData")
 ```
 
 * Plot the results
 
 ```{r, fig.align='center', fig.cap="Effects of additional noise on error rates"}
 load("data/df_bumblebee.RData")
-load("data/df_bumblebee.RData")
-df[["id"]] <- plyr::revalue(df[["id"]], c("bbim" = "Bombus bimaculatus", "beph" = "B. ephippiatus", "bfla" = "B. flavifrons"))
-df[["id"]] <- factor(df[["id"]], levels = c("Bombus bimaculatus","B. ephippiatus", "B. flavifrons"))
+df_bumblebee[["id"]] <- plyr::revalue(df_bumblebee[["id"]], c("bbim" = "Bombus bimaculatus", "beph" = "B. ephippiatus", "bfla" = "B. flavifrons"))
+df_bumblebee[["id"]] <- factor(df_bumblebee[["id"]], levels = c("Bombus bimaculatus","B. ephippiatus", "B. flavifrons"))
 # Figure 8
-ggplot(df, aes(x = noise, y = error,group = id, col = id, fill = id)) + 
+ggplot(df_bumblebee, aes(x = noise, y = error,group = id, col = id, fill = id)) + 
   facet_wrap(~id) +
   geom_smooth(size = 1.5, se = T, aes(group = id)) + 
   geom_boxplot(alpha = .3,size = 0.1,weight = 1, aes(group = noise)) +
@@ -551,9 +564,12 @@ input <- do.call("rbind", lapply(ptw_out, function(fx) {
   temp <- abs(as.vector(fx$sample[[1]][,1]) - as.vector(fx$reference[[1]][,1]))
 }))
 
+## get peak names for cross-reference to Wong et al. 2014
+peaks <- c("IS",as.character(read_peak_list(data = "data/earwig.txt", rt_col_name = "RT")[[1]][2:20,1]))
+
 ## convert to data frames
-df1 <- as.data.frame(aligned); names(df1) <- paste0("P", 1:20); df1 <- suppressMessages(reshape2::melt(df1))
-df2 <- as.data.frame(input); names(df2) <- paste0("P", 1:20); df2 <- suppressMessages(reshape2::melt(df2))
+df1 <- as.data.frame(aligned); names(df1) <- peaks; df1 <- suppressMessages(reshape2::melt(df1))
+df2 <- as.data.frame(input); names(df2) <- peaks; df2 <- suppressMessages(reshape2::melt(df2))
 df1$data <- "ptw"; df2$data <- "raw"
 
 ## merge data frames
@@ -568,7 +584,7 @@ plot <- ggplot(df, aes(x = Peak, y = diff, fill = data)) +
   geom_errorbar(aes(ymin = diff, ymax = diff + sd), width = .2,
                 position = position_dodge(.9)) +
   labs(y = "Deviation from reference\nretention time [minutes]",
-       x = "Peak") +
+       x = "Cuticular hydrocarbon peak number") +
   theme_classic(base_size = 12) +
   scale_fill_manual(values = c('darkblue','red')) +
   scale_y_continuous(breaks = seq(0,0.35,0.05))
