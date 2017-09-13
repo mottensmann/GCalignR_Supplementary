@@ -9,7 +9,7 @@ includes:
     
     ```{r, echo = FALSE}
 library(knitr)
-knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 8,tidy = TRUE,highlight = TRUE,comment = "#>",strip.white = TRUE,collapse = TRUE, fig.align = "center", cache = F)
+knitr::opts_chunk$set(cache = FALSE, fig.width = 8, fig.height = 8,tidy = TRUE,highlight = TRUE,comment = "#>",strip.white = TRUE,collapse = TRUE, fig.align = "center", cache = F, warning = F, message = F)
 options(width = 60)
 ```
 
@@ -157,7 +157,7 @@ scent_nmds <- cbind(scent_nmds,
 ```{r, fig.cap="Two-dimensional nonmetric multidimensional scaling plot of chemical data from 41 Antarctic fur seal mother–offspring pairs. Bray–Curtis similarity values were calculated from standardized and log(x+1) transformed abundance data (see main text for details). Individuals from each of the two colonies described are shown in blue and red respectively"}
 # Figure 3
 ggplot(data = scent_nmds,aes(MDS1,MDS2,color = colony)) +
-    geom_point() + 
+    geom_point(size = 2.5) + 
     theme_void() + 
     scale_color_manual(values = c("blue","red")) +
     theme(panel.background = element_rect(colour = "black", size = 1.25,
@@ -308,9 +308,14 @@ plot <- ggplot(df, aes(x = dataset, y = error, fill = software)) +
              position = position_dodge()) +
     labs(y = "Alignment error rate",
          x = "Bumblebee species") +
-    theme_classic(base_size = 12) +
-    theme(axis.text.x = element_text(face = "italic")) +
-    scale_fill_manual(values = c('red','darkblue'))
+    theme_classic(base_size = 14) +
+    theme(axis.text.x = element_text(face = "italic"),
+          axis.title.x = element_text(margin = margin(t = 10, r = 20, b = 1, l = 0))) +
+    scale_fill_manual(values = c('red','darkblue')) +
+  scale_y_continuous(breaks = seq(0,0.05,0.01),
+                     limits = c(0,0.05),
+                     expand = c(0,0))
+  
 print(plot)
 ```
 
@@ -608,11 +613,15 @@ The data frame 'df' contains the deviation scores for each of the 20 peaks prior
 ```{r, fig.cap="Performance of the alignment algorithm implemented in ptw"}
 plot <- ggplot(df, aes(x = var, y = val, fill = software)) +
   geom_boxplot(outlier.colour = "white") +
-  labs(y = "Change in retention time deviation\n[minutes]",
+  labs(y = "Change in retention time deviation [minutes]",
        x = "Substances") +
   theme_classic(base_size = 12) +
   scale_fill_manual(values = c("red", "blue")) +
-  scale_y_continuous(expand = c(0,0), limits = c(-0.2,0.25))
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(-0.15,0.25),
+                     breaks = seq(-0.25,0.25,0.05)) +
+  geom_hline(yintercept = 0, linetype = "dashed")
+
 print(plot)
 ```
 
