@@ -16,7 +16,7 @@ options(width = 60)
 This document provides all the `R code` used for our paper. Both the Rmarkdown file and the data can be downloaded from the accompanying GitHub repository on (https://github.com/mottensmann/GCalignR_Supplementary) as a zip archive containing all the files. For computational reasons we provide the results of time consuming steps in addition to the raw data on GitHub.
 
 ## Prerequisites
-Most functions that are required to run the code presented within this document are part of our R package `GCalignR` that needs to be installed frist.
+Most functions that are required to run the code presented within this document are part of our R package `GCalignR` that needs to be installed first.
 
 * Installing `GCalignR`.
 
@@ -25,7 +25,7 @@ Most functions that are required to run the code presented within this document 
 install.packages("GCalignR")
 ```
 
-Additional functions are provided in form of `R` scripts that are available in the sub-directory `R`. In order to run the code you need to have a sub-directory called `data` that contains the raw datafiles. Furthermore, the are some packages that are not distributed with base R that have to be installed from CRAN.
+Additional functions are provided in form of `R` scripts that are available in the sub-directory `R`. In order to run the code you need to have a sub-directory called `data` that contains the raw data files. Furthermore, the are some packages that are not distributed with base R that have to be installed from CRAN.
 
 * Install `devtools` , `ggplot2`, `plot3D` and `vegan` if these packages are not available.
 
@@ -96,7 +96,7 @@ fpath <- system.file(dir = "extdata",
 check_input(fpath) # checks the data
 ```
 
-The resulting output of the call to `check_input` "All checks passed!" indicates that the input file meets the data format of `GCalignR`. Next, we align the dataset using the core function `align_chromatograms`. By specifying the negative control samples (i.e. `blanks`) and setting the parameter `delete_single_peak` to `TRUE` we include to optional filtering steps that are executed after the alignment was conducted. Alternatively, these optional steps can be included in the workflow independet of the alignment with `align_chromatograms` by using the functions `remove_blanks` and `remove_singletons` respectively. See the corresponding helpfiles and the vignettes for details on both.
+The resulting output of the call to `check_input` "All checks passed!" indicates that the input file meets the data format of `GCalignR`. Next, we align the dataset using the core function `align_chromatograms`. By specifying the negative control samples (i.e. `blanks`) and setting the parameter `delete_single_peak` to `TRUE` we include to optional filtering steps that are executed after the alignment was conducted. Alternatively, these optional steps can be included in the workflow independent of the alignment with `align_chromatograms` by using the functions `remove_blanks` and `remove_singletons` respectively. See the corresponding helpfiles and the vignettes for details on both.
 
 
 ```{r, eval = FALSE}
@@ -118,7 +118,7 @@ print(aligned_peak_data)
 
 As alignment quality may vary with the parameter values selected by the user, the plot function can be used to output four diagnostic plots.  These allow the user to explore how the parameter values affect the resulting alignment and can help flag issues with the raw data.
 
-```{r, fig.cap = "Diagnostic plots summarising the alignment of the Antarctic fur seal chemical dataset"}
+```{r, fig.cap = "Diagnostic plots summarising the alignment of the Antarctic fur seal chemical dataset."}
 plot(aligned_peak_data) # Figure 1
 ```
 
@@ -154,7 +154,7 @@ scent_nmds <- cbind(scent_nmds,
                     colony = peak_factors[["colony"]]) # add factors
 ```
 
-```{r, fig.cap="Two-dimensional nonmetric multidimensional scaling plot of chemical data from 41 Antarctic fur seal mother–offspring pairs. Bray–Curtis similarity values were calculated from standardized and log(x+1) transformed abundance data (see main text for details). Individuals from each of the two colonies described are shown in blue and red respectively"}
+```{r, fig.cap="Two-dimensional nonmetric multidimensional scaling plot of chemical data from 41 Antarctic fur seal mother–offspring pairs. Bray–Curtis similarity values were calculated from standardized and log(x+1) transformed abundance data. Individuals from each of the two colonies are shown in blue and red respectively"}
 # Figure 3
 ggplot(data = scent_nmds,aes(MDS1,MDS2,color = colony)) +
     geom_point(size = 2.5) + 
@@ -193,15 +193,15 @@ load("data/beph_GCalignR_default.RData")
 
 For all three datasets, only little systematic shifts in retention times of putatively homologous peaks are present in the datasets, as can be seen by the distribution of linear shifts that were applied during the first step of the alignment procedure with `GCalignR`. Consequently, there is no need to increase the window size by adjusting the parameter `max_linear_shift`.
 
-```{r, results='hide', fig.cap="Distribution of applied linear shifts during the first step of the alignment procedure for three bumblebee datasets."}
+```{r, results='hide', fig.cap="Distribution of applied linear shifts during the first step of the alignment procedure for three bumblebee datasets show overall modest systematic shifts in retention times among samples."}
 par(mfrow = c(1, 3))
 plot(bfla_GCalignR_default, which_plot = "shifts", main = "B. flavifrons")
 plot(bbim_GCalignR_default, which_plot = "shifts", main = "B. bimaculatus")
 plot(beph_GCalignR_default, which_plot = "shifts", main = "B. ephippiatus")
 ```
-However, heatmaps show patterns in all three datasetes that indicate that putatively homologous rows exist that can be merged by increasing the value of the parameter `min_diff_peak2peak`. 
+However, heat maps show patterns in all three datasetes that indicate that putatively homologous rows exist that can be merged by increasing the value of the parameter `min_diff_peak2peak`. 
 
-```{r, fig.cap="Heatmaps showing the distribution of substances in the aligned dataset using default parameter values. The left panel shows the complete dataset and the right panels shows an excerpt"}
+```{r, fig.cap="Heatmaps showing the distribution of substances in the aligned dataset using default parameter values. The left panel shows the complete dataset and the right panels shows an excerpt."}
 p1 <- gc_heatmap(bfla_GCalignR_default,
 main = "Alignment with default parameters",
 label = "y",
@@ -216,7 +216,7 @@ show_legend = F)
 grid.arrange(p1, p2, nrow = 1, ncol = 2)
 ```
 
-For example, in the aligned chemical dataset of *B. flavifrons* such a pattern is shown by two rows are that are annotated with '20.23' and '20.71' refering to the mean retention time of the corresponding rows (Figure 5, right panel). In order to allow merging such rows, we fine-tune the alignment by setting `min_diff_peak2peak = 0.48` and run the alignment again.
+For example, in the aligned chemical dataset of *B. flavifrons* such a pattern is shown by two rows are that are annotated with '20.23' and '20.71' referring to the mean retention time of the corresponding rows (Figure 5, right panel). In order to allow merging such rows, we fine-tune the alignment by setting `min_diff_peak2peak = 0.48` and run the alignment again.
 
 ```{r, eval=FALSE,fig.cap= "Heatmaps showing the distribution of substances in the aligned dataset. The left panel shows the complete dataset and the right panels shows an excerpt" }
 bfla_GCalignR_optimised <- align_chromatograms("data/bfla.txt",
@@ -244,9 +244,9 @@ load("data/bbim_GCalignR_optimised.RData")
 load("data/beph_GCalignR_optimised.RData")
 ```
 
-Heatmaps of the fine-tuned alignment show that the two rows corresponding to putatively homologous substances are now merged within the row annotated by '20.59'
+Heat maps of the fine-tuned alignment show that the two rows corresponding to putatively homologous substances are now merged within the row annotated by '20.59'
 
-```{r, fig.cap="Heatmaps showing the distribution of substances in the aligned dataset. The left panel shows the complete dataset and the right panels shows an excerpt"}
+```{r, fig.cap="Heatmaps showing the distribution of substances in the aligned dataset. The left panel shows the complete dataset and the right panels shows an excerpt."}
 p1 <- gc_heatmap(bfla_GCalignR_optimised,
  main = "Alignment with fine-tuned parameters",
  label = "y",
@@ -261,7 +261,7 @@ p2 <- gc_heatmap(bfla_GCalignR_optimised,
 grid.arrange(p1, p2, nrow = 1, ncol = 2)
 ```
 
-Dellicour and Lecocq (2013) published optimised alignments using the software `GCALIGNER`. The results are available in for all three datasets in the supportin information [Table S_2](http://onlinelibrary.wiley.com/wol1/doi/10.1002/jssc.201300388/suppinfo). The format combines all input variables (*RT* = reteten time, *RA* = relative peak area and *Area* = peak area) aligned similarly to `GCalignR` rowise. The function `convert2GCalign` converts each dataset into the format of `GCalignR` in which a matrix containing aligned data for every variable is created.  
+Dellicour and Lecocq (2013) published optimised alignments using the software `GCALIGNER`. The results are available in for all three datasets in the supporting information [Table S_2](http://onlinelibrary.wiley.com/wol1/doi/10.1002/jssc.201300388/suppinfo). The format combines all input variables (*RT* = retention time, *RA* = relative peak area and *Area* = peak area) aligned similarly to `GCalignR` rowise. The function `convert2GCalign` converts each dataset into the format of `GCalignR` in which a matrix containing aligned data for every variable is created.  
 
 ```{r}
 bbim_GCALIGNER <- convert2GCalign(path = "data/Table_S2.xls",
@@ -371,7 +371,7 @@ load("data/errors_bfla.RData")
 
 The resulting alignment error rates can be visualised using three-dimensional plots
 
-```{r,eval=TRUE,fig.cap="Parameter combinations B. bimaculatus dataset"}
+```{r,eval=TRUE,fig.cap="Effects of parameter combinations on alignment error rates based on the B. bimaculatus dataset."}
 with(errors_bbim,scatter3D(
 x = p2p,
 y = p2m,
@@ -394,7 +394,7 @@ cex.main = 1.5,
 zlim = c(0,0.2)))
 ```
 
-```{r, fig.cap="Parameter combinations B. ephippiatus dataset"}
+```{r, fig.cap="Effects of parameter combinations on alignment error rates based on the B. ephippiatus dataset."}
 with(errors_beph, scatter3D(
 x = p2p,
 y = p2m,
@@ -417,7 +417,7 @@ cex.main = 1.5,
 zlim = c(0,0.2)))
 ```
 
-```{r, fig.cap="Parameter combinations B. flavifrons dataset"}
+```{r, fig.cap="Effects of parameter combinations on alignment error rates based on the B. flavifrons dataset."}
 with(errors_bfla, scatter3D(
 x = p2p ,
 y = p2m,
@@ -442,7 +442,7 @@ zlim = c(0,0.2)))
 
 ## Comparison with parametric time warping
 In order to compare alignments conducted with `GCalignR` to alignments using `ptw`, we use a dataset on 
-European earwig (*Forficula auricularia*) individuals (Wong et al. 2014) that were downloaded from [Dryad](https://datadryad.org/resource/doi:10.5061/dryad.73180). This dataset is available as a text file 'earwig.txt' in the input format of `GCalignR`. In addition to retention time and peak intensitiy values this dataset contains the variable 'CHC' giving the substance identity of each peak (Wong et al. 2014), thereby allowing to calculate alignment error rates.
+European earwig (*Forficula auricularia*) individuals (Wong et al. 2014) that were downloaded from [Dryad](https://datadryad.org/resource/doi:10.5061/dryad.73180). This dataset is available as a text file 'earwig.txt' in the input format of `GCalignR`. In addition to retention time and peak intensity values this dataset contains the variable 'CHC' giving the substance identity of each peak (Wong et al. 2014), thereby allowing to calculate alignment error rates.
 
 First, we begin to align the dataset with default parameter values in `GCalginR` using the following code.
 
@@ -457,16 +457,16 @@ The alignment results saved to the file 'earwig_GCalignR_default.RData' are load
 load("data/earwig_GCalignR_default.RData")
 ```
 
-As shown already above for the alignment of the bumblebbe datasets, we inspect the alignment results with diagnositc plots.
+As shown already above for the alignment of the bumblebee datasets, we inspect the alignment results with diagnostic plots.
 
-```{r}
+```{r, fig.cap = "Left skewed distribution of applied linear shifts during the first step of the alignment procedure for an earwig dataset suggest to increase the window size used for the alignment."}
 plot(earwig_GCalignR_default, which_plot = "shifts", main = "Distribution of linear shift in the alignment of\nthe earwig dataset")
 ```
 The distribution of applied linear shifts indicates that a small proportion of samples required a linear transformation saturating the allowed window size of -0.02 to 0.02. Therefore, we will increase the parameter value of `max_linear_shift` to 0.05 in the fine-tune alignment to ensure that all linear shifts can be corrected.  
 Additionally, we inspect alignments with the heatmap function `gc_heatmap`.
 
 
-```{r, fig.cap="Heatmap showing the distribution of substances across the dataset"}
+```{r, fig.cap="Heatmap showing the distribution of substances across the first 200 samples of the dataset."}
 gc_heatmap(earwig_GCalignR_default,
     main = "Alignment with default parameters",
     label = "x",
@@ -475,7 +475,7 @@ gc_heatmap(earwig_GCalignR_default,
     samples_subset = 1:200)
 ```
 
-The heatmap for a subset of 200 samples, shows distinct patterns for multiple adjacent substances that require increasing the value of `min_diff_peak2peak` in order to merging the putatively homologous susbtances. For instance substances annotated by '29.86', '29.99' and '30.36' appear to represent all the same homologous substance with highly variable retention times for a subset of the dataset. 
+The heatmap for a subset of 200 samples, shows distinct patterns for multiple adjacent substances that require increasing the value of `min_diff_peak2peak` in order to merging the putatively homologous substances. For instance substances annotated by '29.86', '29.99' and '30.36' appear to represent all the same homologous substance with highly variable retention times for a subset of the dataset. 
 Hence, we fine-tune the alignment by setting `min_diff_peak2peak = 0.75`
 
 ```{r, eval=FALSE}
@@ -492,14 +492,14 @@ load("data/earwig_GCalignR_optimised.RData")
 
 By inspecting the distribution of applied linear shifts in the fine-tuned alignment, we ensure that now all systematic shifts in retention times have been accounted for.
 
-```{r, fig.cap="Distribution of linear shifts applied during the first step of the alignment procedure implemented in GCalignR"}
+```{r, fig.cap="Distribution of linear shifts applied during the first step of the alignment procedure implemented in GCalignR. All applied shifts are centered around zero and are and do not extend to the entire range allowed by the window size."}
 
 plot(earwig_GCalignR_optimised, which_plot = "shifts", main = "Distribution of linear shift in the fine-tuned alignment of\nthe earwig dataset")
 ```
 
 Also we inspect the heatmap again
 
-```{r, fig.cap="Heatmap showing the distribution of substances in the earwig dataset after fine-tuning alignment parameters"}
+```{r, fig.cap="Heatmap showing the distribution of substances in the earwig dataset after fine-tuning alignment parameters."}
 
 gc_heatmap(earwig_GCalignR_optimised,
   main = "Alignment with fine/tuned parameters",
@@ -515,7 +515,7 @@ Both plots suggest that the fine-tuning of the alignment parameter resulted in a
 print(earwig_GCalignR_optimised)
 ```
 
-Therefore, we simply evaluate that each aligned substance in the dataset is only comprised of the same peak identity using the aligned matrix for the variable 'CHC'. A subset of the matrix is shown below. Each value of the matrix correspond to a hydrcarbon peak identified in Wong et al. 2014, except for '99' that encodes the internal standard used for this GC-MS dataset. 
+Therefore, we simply evaluate that each aligned substance in the dataset is only comprised of the same peak identity using the aligned matrix for the variable 'CHC'. A subset of the matrix is shown below. Each value of the matrix correspond to a hydrocarbon peak identified in Wong et al. 2014, except for '99' that encodes the internal standard used for this GC-MS dataset. 
 
 ```{r}
 knitr::kable(earwig_GCalignR_optimised$aligned$CHC[1:10,1:10], caption = "Alignment with GCalignR")
@@ -610,7 +610,7 @@ df <- data.frame(var = rep(df1$variable,2),
 
 The data frame 'df' contains the deviation scores for each of the 20 peaks prior to and after aligning the dataset with `ptw`. The deviations values are plotted using the following code
 
-```{r, fig.cap="Performance of the alignment algorithm implemented in ptw"}
+```{r, fig.cap="Performance of the alignment algorithm implemented in ptw."}
 plot <- ggplot(df, aes(x = var, y = val, fill = software)) +
   geom_boxplot(outlier.colour = "white") +
   labs(y = "Change in retention time deviation [minutes]",
@@ -624,7 +624,7 @@ plot <- ggplot(df, aes(x = var, y = val, fill = software)) +
 
 print(plot)
 ```
-
+\newpage
 ## References
 
 Bloemberg, T. G., Gerretzen, J., Wouters, H. J., Gloerich, J., van Dael, M., Wessels, H. J., ... & Wehrens, R. (2010). Improved parametric time warping for proteomics. Chemometrics and Intelligent Laboratory Systems, 104(1), 65-74.
