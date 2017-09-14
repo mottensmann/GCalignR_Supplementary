@@ -2,12 +2,12 @@
 Overview
 ========
 
-`GCalignR`: An R package for aligning Gas-Chromatography data
--------------------------------------------------------------
+`GCalignR`: An R package for aligning Gas-Chromatography data for ecological and evolutionary studies
+-----------------------------------------------------------------------------------------------------
 
 #### Meinolf Ottensmann, Martin A. Stoffel, Hazel J. Nichols and Joseph I. Hoffman
 
--   **R\_code.pdf** contains the code for all analyses. In addition, we provide our data in the folder called data, which should be placed in a subfolder of the working directory called data.
+-   **R\_code.pdf** contains the code for all analyses. In addition, we provide our datafiles in the folder called data, which should be placed in a subfolder of the working directory in order to repeat analyses.
 
 **`data`**
 ----------
